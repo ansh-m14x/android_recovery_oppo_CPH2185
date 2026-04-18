@@ -1,4 +1,4 @@
-name: Recovery Build
+name: PBRP Recovery Build
 
 on:
   workflow_dispatch:
@@ -6,11 +6,11 @@ on:
       MANIFEST_URL:
         description: 'MANIFEST_URL'
         required: true
-        default: 'https://github.com/minimal-manifest-twrp/platform_manifest_twrp_aosp'
+        default: 'https://github.com/PitchBlackRecoveryProject/manifest_pb'
       MANIFEST_BRANCH:
         description: 'MANIFEST_BRANCH'
         required: true
-        default: 'twrp-12.1'
+        default: 'android-12.1'
       DEVICE_TREE_URL:
         description: 'DEVICE_TREE_URL'
         required: true
@@ -18,23 +18,23 @@ on:
       DEVICE_TREE_BRANCH:
         description: 'DEVICE_TREE_BRANCH'
         required: true
-        default: 'twrp-12.1'
+        default: 'pbrp' # Yahan apni PBRP branch ka naam check kar lena
       DEVICE_PATH:
         description: 'DEVICE_PATH'
         required: true
-        default: 'device/oppo/CPH2185'
+        default: 'device/oppo/OP4C7D'
       DEVICE_NAME:
         description: 'DEVICE_NAME'
         required: true
-        default: 'CPH2185'
+        default: 'OP4C7D'
       MAKEFILE_NAME:
         description: 'MAKEFILE_NAME'
         required: true
-        default: 'omni_CPH2185'
+        default: '_OP4C7D' # omni_ se badal kar pb_ kar diya hai
       BUILD_TARGET:
         description: 'BUILD_TARGET'
         required: true
-        default: 'recovery'
+        default: 'pbrp' # PBRP ka main target 'pbrp' hota hai
 
 jobs:
   build:
@@ -65,13 +65,13 @@ jobs:
       run: |
         mkdir workspace
         cd workspace
-        git config --global user.name "ansh_m14x"
+        git config --global user.name "Ansh"
         git config --global user.email "ansh@example.com"
         repo init --depth=1 -u ${{ github.event.inputs.MANIFEST_URL }} -b ${{ github.event.inputs.MANIFEST_BRANCH }}
       id: pwd
 
     - name: Repo Sync
-      run: repo sync -j$(nproc --all) --force-sync
+      run: repo sync -j$(nproc --all) --force-sync --no-tags --no-clone-bundle
       working-directory: workspace
 
     - name: Clone device tree
@@ -83,22 +83,25 @@ jobs:
       with:
         swap-size-gb: 12
 
-    - name: Building recovery
+    - name: Building PBRP
       run: |
+        cd workspace
         source build/envsetup.sh
         export ALLOW_MISSING_DEPENDENCIES=true
         
-        # 🏗️ Setup lunch and start build
+        # 🏗️ Setup lunch and start PBRP build
         lunch ${{ github.event.inputs.MAKEFILE_NAME }}-eng
         echo "🏗️ Starting Build for ${{ github.event.inputs.DEVICE_NAME }}..."
-        make ${{ github.event.inputs.BUILD_TARGET }}image -j$(nproc --all)
-      working-directory: workspace
+        mka ${{ github.event.inputs.BUILD_TARGET }} -j$(nproc --all)
+      shell: bash
 
     - name: Upload to Release
       uses: softprops/action-gh-release@v2
       with:
-        files: workspace/out/target/product/${{ github.event.inputs.DEVICE_NAME }}/${{ github.event.inputs.BUILD_TARGET }}.img
-        name: ${{ github.event.inputs.DEVICE_NAME }}-${{ github.run_id }}
+        files: |
+          workspace/out/target/product/${{ github.event.inputs.DEVICE_NAME }}/recovery.img
+          workspace/out/target/product/${{ github.event.inputs.DEVICE_NAME }}/PBRP*.zip
+        name: PBRP-${{ github.event.inputs.DEVICE_NAME }}-${{ github.run_id }}
         tag_name: ${{ github.run_id }}
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
