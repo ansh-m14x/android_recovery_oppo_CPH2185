@@ -143,7 +143,7 @@ TW_OZIP_DECRYPT_KEY := 0000
 ENABLE_SCHEDBOOST := true
 
 # resetprop and magiskboot
-TW_INCLUDE_RESETPROP := false
+TW_INCLUDE_RESETPROP := true
 TW_INCLUDE_REPACKTOOLS := true
 
 # AVB
