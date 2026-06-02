@@ -1,0 +1,30 @@
+name: OrangeFox - Builder
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: 🦊 Building OrangeFox Recovery
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+    permissions: write-all
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: OrangeFox Build
+      uses: UWU-TEAM/UWU-OrangeFox-Builder@v1.0.0
+      with:
+        USER_NAME: 'YourName'
+        USER_EMAIL: 'YourE-mail@gmail.com'
+        DEVICE_TREE: 'https://github.com/ansh-m14x/android_recovery_oppo_CPH2185'
+        DEVICE_TREE_BRANCH: 'PBRP'
+        DEVICE_PATH: 'device/OPPO/CPH2185'
+        DEVICE_NAME: 'CPH2185'
+        BUILD_TARGET: 'recovery'
+        TG_CHAT_ID: '${{ secrets.TG_CHAT_ID }}'
+        TG_TOKEN: '${{ secrets.TG_TOKEN }}'
+        MAINTAINER_URL: 'https://i.ibb.co.com/8gyjXq06/maintainer.png'
+        GH_RELEASE: 'true'
